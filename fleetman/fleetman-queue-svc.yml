@@ -1,0 +1,26 @@
+apiVersion: v1
+kind: Service
+metadata:
+  # this is what nslookup and resolv.conf inconjunction with property file in simulator code will use
+  name: fleetman-queue
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+
+  selector:
+    name: fleetman-queue
+    app: queue
+    
+
+  ports:
+    - name: http
+      port: 8161
+      targetPort: 8161
+      nodePort: 30020
+    - name: endpoint
+      port: 61616
+
+  type: NodePort
+

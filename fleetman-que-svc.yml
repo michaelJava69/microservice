@@ -1,0 +1,22 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-queue-svc
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    name: fleetman-queue
+    app: webapp
+    #release: "0-5"
+
+  ports:
+    - name: http
+      port: 8161
+      targetPort: 8161
+      nodePort: 30020
+
+  type: NodePort
+

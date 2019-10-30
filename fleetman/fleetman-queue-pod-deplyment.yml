@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: queue
+spec:
+  #minReadySeconds: 30
+  selector:
+    matchLabels:
+       name: fleetman-queue
+       app: queue
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        name: fleetman-queue
+        app: queue
+        
+    spec:
+      containers:
+      - name: fleetman-queue
+        image:  richardchesterwood/k8s-fleetman-queue:release2
+
