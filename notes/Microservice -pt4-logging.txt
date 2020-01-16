@@ -1,0 +1,160 @@
+https://hub.docker.com/u/richardchesterwood
+
+https://github.com/michaelJava69/k8s-fleetman
+
+https://microservices.io/patterns/apigateway
+
+
+Pods stuck
+==========
+
+api-gateway-567cccb5f9-qv97r
+
+kubectl delete pod api-gateway-567cccb5f9-qv97r --grace-period=0 --force --wait=false
+
+
+
+===================
+volumes
+======================
+
+https://kubernetes.io/docs/reference/generated/kubernetes-api/v1.13/
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mongodb
+spec:
+  selector:
+    matchLabels:
+      app: mongodb
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: mongodb
+    spec:
+      containers:
+      - name: mongodb
+        image: mongo:3.6.5-jessie
+        volumeMounts:
+          - name: mongo-persistent-storage
+            mountPath: /data/db
+      volumes:
+        - name: mongo-persistent-storage
+          # pointer to the configuration of HOW we want the mount to be implemented
+          persistentVolumeClaim:
+            claimName: mongo-pvc
+            
+            
+====================================================
+# What do want?
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  storageClassName: mylocalstorage
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 20Gi
+---
+# How do we want it implemented
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: local-storage
+spec:
+  storageClassName: mylocalstorage
+  capacity:
+    storage: 20Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/some new/directory/structure/"
+    type: DirectoryOrCreate
+    
+    
+=================================================================================
+AWS
+=======================================
+
+# What do want?
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mongo-pvc
+spec:
+  storageClassName: cloud-ssd
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 7Gi
+---
+# How do we want it implemented
+apiVersion: storage.k8s.io/v1
+kind: StorageClass
+metadata:
+  name: cloud-ssd
+provisioner: kubernetes.io/aws-ebs
+parameters:
+  type: gp2
+  
+  
+
+=============================
+Load Balancer
+
+===============================================
+
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: fleetman-webapp
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+  selector:
+    name: fleetman-webapp
+    app: webapp
+    #release: "0-5"
+
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      #nodePort: 30080
+
+  #type: NodePort
+  type: LoadBalancer
+=================
+http://a03bb1bbdf45811e982650228730cb2f-1361945791.eu-west-1.elb.amazonaws.com/
+========================================
+  
+  
+======
+creating a better Domain name
+===============================
+Go to Hosted zone
+
+Click on azuka.tk
+	Created Record set
+		type fleetman
+			selct Alias
+				ipv4
+					From dropdown
+						select -  a03....the rest will com up
+											create button
+											
+==============================
+fleetman.kops.azuka.tk.
+
+=====================
+						
+

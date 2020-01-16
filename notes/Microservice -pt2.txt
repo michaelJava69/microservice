@@ -1,0 +1,165 @@
+https://hub.docker.com/u/richardchesterwood
+
+https://github.com/michaelJava69/k8s-fleetman
+
+https://microservices.io/patterns/apigateway
+
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: position-simulator
+spec:
+  selector:
+    matchLabels:
+      app: position-simulator
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: position-simulator
+    spec:
+      containers:
+      - name: position-simulator
+        image: richardchesterwood/k8s-fleetman-position-simulator:release1
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+
+==============================================================================================================================================
+This property file  SIMULATOR
+##############################################################################################
+spring.activemq.broker-url=tcp://fleetman-queue.default.svc.cluster.local:61616
+                                 ==============
+fleetman.position.queue=positionQueue
+
+Look-up
+root@position-simulator-66b7994dd9-lqcsd:/# cat /etc/resolv.conf
+nameserver 100.64.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local eu-west-1.compute.internal
+options ndots:5
+##############################################################################################
+
+
+=======================================================================================================================================
+
+1. position-simulator nslookup goes to resolv.conf   (in its own environment )
+
+                                ============
+                                
+	tags [fleetman-queue] the follwoing at the back of fleetman-queue
+			default.svc.cluster.local
+				svc.cluster.local
+				    cluster.local
+	
+2.	When it finds it uses the ClusterIP address in situ which points at Kube-dns service 
+3.	The kube-dns service uses again the resolv.conf.....to point at its ClusterIP which points at the service fleetman-queue service
+	
+4.	The service is found becuase the url name is exactly same as the metatdata name of the service name of fleetman-queue
+													       ==============				    
+
+ 
+
+
+
+
+================================================================================================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  # this is what nslookup and resolv.conf inconjunction with property file in simulator code will use
+  name: fleetman-queue
+        ============== 
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+
+  selector:
+    name: fleetman-queue
+    app: queue
+
+
+  ports:
+    - name: http
+      port: 8161
+      targetPort: 8161
+      nodePort: 30020
+    - name: endpoint
+      port: 61616
+
+  type: NodePort
+
+
+
+
+=============================================
+GATEWAY
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api-gateway
+spec:
+  selector:
+    matchLabels:
+      app: api-gateway
+  replicas: 1
+  template: # template for the pods
+    metadata:
+      labels:
+        app: api-gateway
+    spec:
+      containers:
+      - name: api-gateway
+        image: richardchesterwood/k8s-fleetman-api-gateway:release1
+        env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: production-microservice
+          
+          
+==============================================================================================================================================
+This property file GATEWAY
+##############################################################################################
+position-tracker-url=fleetman-position-tracker.default.svc.cluster.local:8080
+                              ================
+
+
+Look-up
+root@position-simulator-66b7994dd9-lqcsd:/# cat /etc/resolv.conf
+nameserver 100.64.0.10
+search default.svc.cluster.local svc.cluster.local cluster.local eu-west-1.compute.internal
+options ndots:5
+##############################################################################################
+
+
+=======================================================================================================================================
+
+apiVersion: v1
+kind: Service
+metadata:
+  # this is what nslookup and resolv.conf inconjunction with property file in simulator code will use
+  name: fleetman-queue
+        ============== 
+
+spec:
+  # This defines which pods are going to be represented by this Service
+  # The service becomes a network endpoint for either other services
+  # or maybe external users to connect to (eg browser)
+
+  selector:
+    name: fleetman-queue
+    app: queue
+
+
+  ports:
+    - name: http
+      port: 8161
+      targetPort: 8161
+      nodePort: 30020
+    - name: endpoint
+      port: 61616
+
+  type: NodePort
+

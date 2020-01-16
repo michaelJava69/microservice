@@ -1,0 +1,355 @@
+https://hub.docker.com/u/richardchesterwood
+https://github.com/michaelJava69/k8s-fleetman
+https://microservices.io/patterns/apigateway
+
+
+Tiller
+======
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller --upgrade
+
+#kubectl patch deploy --namespace kube-system tiller-deploy -p '{"spec":{"template":{"spec":{"serviceAccount":"tiller"}}}}' 
+
+
+https://prometheus.io/
+https://grafana.com/grafana/dashboards
+
+kubectl get po -n kube-system
+
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get po -n kube-system
+NAME                                                                 READY   STATUS    RESTARTS   AGE
+dns-controller-7f64776589-fxkl4                                      1/1     Running   0          34m
+etcd-server-events-ip-172-20-56-96.eu-west-1.compute.internal        1/1     Running   0          33m
+etcd-server-ip-172-20-56-96.eu-west-1.compute.internal               1/1     Running   0          33m
+kube-apiserver-ip-172-20-56-96.eu-west-1.compute.internal            1/1     Running   0          34m
+kube-controller-manager-ip-172-20-56-96.eu-west-1.compute.internal   1/1     Running   0          33m
+kube-dns-6b4f4b544c-5khj2                                            3/3     Running   0          31m
+kube-dns-6b4f4b544c-7v25j                                            3/3     Running   0          34m
+kube-dns-autoscaler-6b658bd4d5-jnbms                                 1/1     Running   0          34m
+kube-proxy-ip-172-20-33-132.eu-west-1.compute.internal               1/1     Running   0          20m
+kube-proxy-ip-172-20-50-120.eu-west-1.compute.internal               1/1     Running   0          30m
+kube-proxy-ip-172-20-56-96.eu-west-1.compute.internal                1/1     Running   0          33m
+kube-scheduler-ip-172-20-56-96.eu-west-1.compute.internal            1/1     Running   0          33m
+
+kubectl create serviceaccount --namespace kube-system tiller
+kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+helm init --service-account tiller --upgrade
+
+
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get po -n kube-system
+NAME                                                                 READY   STATUS    RESTARTS   AGE
+dns-controller-7f64776589-fxkl4                                      1/1     Running   0          39m
+etcd-server-events-ip-172-20-56-96.eu-west-1.compute.internal        1/1     Running   0          38m
+etcd-server-ip-172-20-56-96.eu-west-1.compute.internal               1/1     Running   0          38m
+kube-apiserver-ip-172-20-56-96.eu-west-1.compute.internal            1/1     Running   0          38m
+kube-controller-manager-ip-172-20-56-96.eu-west-1.compute.internal   1/1     Running   0          38m
+kube-dns-6b4f4b544c-5khj2                                            3/3     Running   0          35m
+kube-dns-6b4f4b544c-7v25j                                            3/3     Running   0          39m
+kube-dns-autoscaler-6b658bd4d5-jnbms                                 1/1     Running   0          39m
+kube-proxy-ip-172-20-33-132.eu-west-1.compute.internal               1/1     Running   0          24m
+kube-proxy-ip-172-20-50-120.eu-west-1.compute.internal               1/1     Running   0          35m
+kube-proxy-ip-172-20-56-96.eu-west-1.compute.internal                1/1     Running   0          38m
+kube-scheduler-ip-172-20-56-96.eu-west-1.compute.internal            1/1     Running   0          38m
+tiller-deploy-759cb9df9-dmzjf                                        1/1     Running   0          15s
+
+
+
+
+--set prometheusOperator.createCustomResource=false
+
+Error: apiVersion "monitoring.coreos.com/v1" in prometheus-operator/templates/prometheus/rules/kubernetes-system.yaml is not available
+
+helm repo update
+helm install --name monitoring --namespace monitoring   stable/prometheus-operator 
+Error: Chart incompatible with Tiller v2.9.1
+#helm install --name monitoring --namespace monitoring stable/prometheus-operator --version 7.0.0
+
+
+Install Helm again
+
+	wget https://get.helm.sh/helm-v2.15.2-linux-amd64.tar.gz
+
+tar zxvf  helm-v2.15.2-linux-amd64.tar.gz
+linux-amd64/
+linux-amd64/tiller
+linux-amd64/helm
+linux-amd64/README.md
+linux-amd64/LICENSE
+
+	sudo mv linux-amd64/helm /usr/local/bin/
+	========================================
+	helm init --service-account tiller --upgrade
+
+root@michael-VirtualBox:/home/michael/kubernetes/microservice/linux-amd64# helm init --service-account tiller --upgrade
+$HELM_HOME has been configured at /root/.helm.
+Tiller (the Helm server-side component) has been updated to gcr.io/kubernetes-helm/tiller:v2.15.2 .
+
+	helm install --name monitoring --namespace monitoring stable/prometheus-operator
+
+
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get pods -n monitoring
+NAME                                                     READY   STATUS    RESTARTS   AGE
+alertmanager-monitoring-prometheus-oper-alertmanager-0   2/2     Running   0          1m
+monitoring-grafana-5458487ccf-5rr7q                      2/2     Running   0          1m
+monitoring-kube-state-metrics-7985b796d9-x99hr           1/1     Running   0          1m
+monitoring-prometheus-node-exporter-tjwf7                1/1     Running   0          1m
+monitoring-prometheus-node-exporter-w4ngj                1/1     Running   0          1m
+monitoring-prometheus-node-exporter-zsdhb                1/1     Running   0          1m
+monitoring-prometheus-oper-operator-7d6fb857c7-llvpq     2/2     Running   0          1m
+prometheus-monitoring-prometheus-oper-prometheus-0       3/3     Running   1          58s
+
+kubectl get all -n monitoring
+
+===================================
+editing a service in place
+===================================
+
+ 	kubectl edit -n monitoring service/monitoring-prometheus-oper-prometheus
+ 	
+ # Please edit the object below. Lines beginning with a '#' will be ignored,
+ # and an empty file will abort the edit. If an error occurs while saving this file will be
+ # reopened with the relevant failures.
+ #
+ apiVersion: v1
+ kind: Service
+ metadata:
+   creationTimestamp: "2019-10-29T23:00:05Z"
+   labels:
+     app: prometheus-operator-prometheus
+     chart: prometheus-operator-7.0.0
+     heritage: Tiller
+     release: monitoring
+     self-monitor: "true"
+   name: monitoring-prometheus-oper-prometheus
+   namespace: monitoring
+   resourceVersion: "11767"
+   selfLink: /api/v1/namespaces/monitoring/services/monitoring-prometheus-oper-prometheus
+   uid: d9060dc6-fa9f-11e9-8dad-02917e50d648
+ spec:
+   clusterIP: 100.71.173.26
+   ports:
+   - name: web
+     port: 9090
+     protocol: TCP
+     targetPort: 9090
+   selector:
+     app: prometheus
+     prometheus: monitoring-prometheus-oper-prometheus
+   sessionAffinity: None
+   type: ClusterIP
+ status:
+  loadBalancer: {}
+  
+  export EDITOR=nano
+  
+  ========================================================================
+  if you chnge type to Loadbalancer change will take effect immediately
+  When you revert back rem t0 delete ec tra line added to this file
+       nodePort: 32049    
+ ELB corresponding deleted auato
+ =========================================================================
+ 
+ kubectl edit -n monitoring service/monitoring-grafana
+ 	change to loadbalancer
+ 
+ DNS = ad90e551efa9f11e98dad02917e50d64-425802126.eu-west-1.elb.amazonaws.com
+ 
+ Put in browser  ## wait  a TIME
+ 
+ =============================
+ https://github.com/helm/charts/tree/master/stable/prometheus-operator
+ From doc user 	admin
+ 	  	prom-operator
+ 	  	
+ 	  	
+===========================================================================
+Alerts  service/alertmanager-operated
+================================================================
+
+Going to use proxy    # can not see proxy loadbalancer in my console so going the manual way
+
+
+kubectl edit -n monitoring service/alertmanager-operated     # can not do that as well so abandon for now
+
+=====================================================================================================
+
+https://hooks.slack.com/services/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
+
+Look at Promethues website to find out about intergartions to alerting
+https://prometheus.io/docs/alerting/configuration/
+
+=============
+root@michael-VirtualBox:/home/michael/kubernetes/microservice/fleetman# kubectl get all -n monitoring
+NAME                                                         READY   STATUS    RESTARTS   AGE
+pod/alertmanager-monitoring-prometheus-oper-alertmanager-0   2/2     Running   0          6m
+pod/monitoring-grafana-78cc9458cf-6bg7m                      2/2     Running   0          7m
+pod/monitoring-kube-state-metrics-7985b796d9-cb55j           1/1     Running   0          7m
+pod/monitoring-prometheus-node-exporter-dz78b                1/1     Running   0          7m
+pod/monitoring-prometheus-node-exporter-g4k8f                1/1     Running   0          7m
+pod/monitoring-prometheus-node-exporter-kfnmw                1/1     Running   0          7m
+pod/monitoring-prometheus-oper-operator-6496ff75d5-vsw9w     2/2     Running   0          7m
+pod/prometheus-monitoring-prometheus-oper-prometheus-0       3/3     Running   1          6m
+
+NAME                                              TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)                      AGE
+service/alertmanager-operated                     ClusterIP   None             <none>        9093/TCP,9094/TCP,9094/UDP   7m
+service/monitoring-grafana                        ClusterIP   100.69.252.88    <none>        80/TCP                       7m
+service/monitoring-kube-state-metrics             ClusterIP   100.67.144.16    <none>        8080/TCP                     7m
+service/monitoring-prometheus-node-exporter       ClusterIP   100.68.64.61     <none>        9100/TCP                     7m
+service/monitoring-prometheus-oper-alertmanager   ClusterIP   100.64.230.161   <none>        9093/TCP                     7m
+service/monitoring-prometheus-oper-operator       ClusterIP   100.65.71.28     <none>        8080/TCP,443/TCP             7m
+service/monitoring-prometheus-oper-prometheus     ClusterIP   100.71.113.219   <none>        9090/TCP                     7m
+service/prometheus-operated                       ClusterIP   None             <none>        9090/TCP                     6m
+
+NAME                                                 DESIRED   CURRENT   READY   UP-TO-DATE   AVAILABLE   NODE SELECTOR   AGE
+daemonset.apps/monitoring-prometheus-node-exporter   3         3         2       3            2           <none>          7m
+
+NAME                                                  DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/monitoring-grafana                    1         1         1            0           7m
+deployment.apps/monitoring-kube-state-metrics         1         1         1            1           7m
+deployment.apps/monitoring-prometheus-oper-operator   1         1         1            1           7m
+
+NAME                                                             DESIRED   CURRENT   READY   AGE
+replicaset.apps/monitoring-grafana-78cc9458cf                    1         1         0       7m
+replicaset.apps/monitoring-kube-state-metrics-7985b796d9         1         1         1       7m
+replicaset.apps/monitoring-prometheus-oper-operator-6496ff75d5   1         1         1       7m
+
+NAME                                                                    DESIRED   CURRENT   AGE
+statefulset.apps/alertmanager-monitoring-prometheus-oper-alertmanager   1         1         7m
+statefulset.apps/prometheus-monitoring-prometheus-oper-prometheus       1         1         7m
+root@michael-VirtualBox:/home/michael/kubernetes/microservice/fleetman#
+
+===========
+
+
+alertmanager.yml
++++++++++++++++++
+
+You would have several hours on repeat interval
+
+global:
+  slack_api_url: 'https://hooks.slack.com/services/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'
+route:
+  group_by: ['alertname']
+  group_wait: 5s
+  group_interval: 1m
+  repeat_interval: 10m
+  receiver: 'slack'
+
+receivers:
+- name: 'slack'
+  slack_configs:
+  - channel: '#alerts'
+    icon_emoji: ':bell:'
+    send_resolved: true
+    text: "<!channel> \nsummary: {{ .CommonAnnotations.message }}\n"
+
+
+Create file alertmanager.yml and add above  save
+
+kubectl describe -n monitoring  pod/alertmanager-monitoring-prometheus-oper-alertmanager-0	
+
+  
+  	kubectl logs -n monitoring -c alert-manager alertmanager-monitoring-prometheus-oper-alertmanager-0
+ 		These logs will tell us secrte uploaded
+ 		
+ 	kubectl get secret -n monitoring
+ 	alertmanager-monitoring-prometheus-oper-alertmanager   Opaque                                1      2h
+
+ 	kubectl get secret -n monitoring alertmanager-monitoring-prometheus-oper-alertmanager -o json	
+ 	#
+ 	
+	root@michael-VirtualBox:/home/michael/kubernetes/microservice/fleetman# kubectl get secret -n monitoring alertmanager-monitoring-prometheus-oper-alertmanager -o json
+	{
+	    "apiVersion": "v1",
+	    "data": {
+	        "alertmanager.yaml": "Z2xvYmFsOgogIHJlc29sdmVfdGltZW91dDogNW0KcmVjZWl2ZXJzOgotIG5hbWU6ICJudWxsIgpyb3V0ZToKICBncm91cF9ieToKICAtIGpvYgogIGdyb3VwX2ludGVydmFsOiA1bQogIGdyb3VwX3dhaXQ6IDMwcwogIHJlY2VpdmVyOiAibnVsbCIKICByZXBlYXRfaW50ZXJ2YWw6IDEyaAogIHJvdXRlczoKICAtIG1hdGNoOgogICAgICBhbGVydG5hbWU6IFdhdGNoZG9nCiAgICByZWNlaXZlcjogIm51bGwiCg=="
+	    },
+	    "kind": "Secret",
+	    "metadata": {
+	        "creationTimestamp": "2019-10-29T23:00:05Z",
+	        "labels": {
+	            "app": "prometheus-operator-alertmanager",
+	            "chart": "prometheus-operator-7.0.0",
+	            "heritage": "Tiller",
+	            "release": "monitoring"
+	        },
+	        "name": "alertmanager-monitoring-prometheus-oper-alertmanager",
+	        "namespace": "monitoring",
+	        "resourceVersion": "11700",
+	        "selfLink": "/api/v1/namespaces/monitoring/secrets/alertmanager-monitoring-prometheus-oper-alertmanager",
+	        "uid": "d8d3688d-fa9f-11e9-8dad-02917e50d648"
+	    },
+	    "type": "Opaque"
+	}
+
+         The base 64 is the secrte file.
+         
+         ======================================
+         =====================================
+         
+         So delete it and replace with above
+                kubectl delete secret -n monitoring alertmanager-monitoring-prometheus-oper-alertmanager
+         	kubectl create secret -n monitoring generic alertmanager-monitoring-prometheus-oper-alertmanager --from-file=alertmanager.yml
+ 	
+ 	=============
+ 	logs  ; kubectl logs -n monitoring -c alert-manager alertmanager-monitoring-prometheus-oper-alertmanager
+ 	============
+ 	level=info ts=2019-10-29T23:00:39.739Z caller=coordinator.go:131 component=configuration msg="Completed loading of configuration file" file=/etc/alertmanager/config/alertmanager.yaml
+ 	
+ 	
+ 	
+ 	######if needed	
+  	kubectl describe pod -n monitoring -c alert-manager alertmanager-monitoring-prometheus-oper-alertmanager
+  	
+ 
+ 
+ root@michael-VirtualBox:/home/michael/kubernetes/microservice/fleetman# echo 'Z2xvYmFsOgogIHNsYWNrX2FwaV91cmw6ICdodHRwczovL2hvb2tzLnNsYWNrLmNvbS9zZXJ2aWNlcy9UUFhDQVFQUEUvQlBLM0syTThTL1NrQmRUMUNNRnJZRFVPcVl2ZmxaeGJMcycKcm91dGU6CiAgZ3JvdXBfYnk6IFsnYWxlcnRuYW1lJ10KICBncm91cF93YWl0OiA1cwogIGdyb3VwX2ludGVydmFsOiAxbQogIHJlcGVhdF9pbnRlcnZhbDogMTBtCiAgcmVjZWl2ZXI6ICdzbGFjaycKCnJlY2VpdmVyczoKLSBuYW1lOiAnc2xhY2snCiAgc2xhY2tfY29uZmlnczoKICAtIGNoYW5uZWw6ICcjYWxlcnRzJwogICAgaWNvbl9lbW9qaTogJzpiZWxsOicKICAgIHNlbmRfcmVzb2x2ZWQ6IHRydWUKICAgIHRleHQ6ICI8IWNoYW5uZWw+IFxuc3VtbWFyeToge3sgLkNvbW1vbkFubm90YXRpb25zLm1lc3NhZ2UgfX1cbiIK' | base64 --decode
+ global:
+   slack_api_url: 'https://hooks.slack.com/services/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'
+ route:
+   group_by: ['alertname']
+   group_wait: 5s
+   group_interval: 1m
+   repeat_interval: 10m
+   receiver: 'slack'
+ 
+ receivers:
+ - name: 'slack'
+   slack_configs:
+   - channel: '#alerts'
+     icon_emoji: ':bell:'
+     send_resolved: true
+     text: "<!channel> \nsummary: {{ .CommonAnnotations.message }}\n"
+
+
+
+
+
+
+https://hooks.slack.com/services/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
+https://hooks.slack.com/services/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
+==========
+The secret
+==========
+alertmanager-monitoring-prometheus-oper-alertmanager
+
+
+curl -X POST --data-urlencode "payload={\"channel\": \"#alert\", \"username\": \"webhookbot\", \"text\": \"This is posted to #alert and comes from a bot named webhookbot.\", \"icon_emoji\": \":ghost:\"}" https://hooks.slack.com/services/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
+
+
+
+
+
+
+
+
+==============================
+kops  --state=s3://kops.helm2.devopsinuse.com validate cluster
+
+kops edit cluster  --state=s3://kops.helm2.devopsinuse.com --name kops.azuka.tk
+
+
+kops update cluster  --state=s3://kops.helm2.devopsinuse.com --name kops.azuka.tk --yes
+
+kops rolling-update cluster  --state=s3://kops.helm2.devopsinuse.com --name kops.azuka.tk

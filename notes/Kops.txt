@@ -1,0 +1,21 @@
+Created Kops on an ec2 instance
+
+Create an ec2 instance
+
+curl -OL https://github.com/kubernetes/kops/releases/download/1.10.0/kops-darwin-amd64
+chmod +x kops-darwin-amd64
+mv kops-darwin-amd64 /usr/local/bin/kops
+ 
+ 
+
+If on ec2 instance
+==================
+Create IAM user : give useradmin access
+get key and secret
+download this key and use in Gitbash to access the ec32 instance : see examples in text files
+
+sudo apt update
+sudo apt install openssh-server
+sudo systemctl status ssh
+
+ssh -i nicola.pem ec2-user@/<ip address of ec2 instance>

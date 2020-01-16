@@ -1,0 +1,203 @@
+created a deployment yml manifest
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: webapp
+spec:
+  minReadySeconds: 30
+  selector:
+    matchLabels:
+       name: fleetman-webapp
+       app: webapp
+  replicas: 2
+  template: # template for the pods
+    metadata:
+      labels:
+        name: fleetman-webapp
+        app: webapp
+        
+    spec:
+      containers:
+      - name: fleetman-webapp
+        image:  richardchesterwood/k8s-fleetman-webapp-angular:release0
+
+=================================================================================
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get pods
+=========================================================================================
+NAME                      READY   STATUS    RESTARTS   AGE
+webapp-579fb659cd-dj597   1/1     Running   0          10s
+webapp-579fb659cd-srxww   1/1     Running   0          10s
+webapp-queue              1/1     Running   0          35m
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get all
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/webapp-579fb659cd-dj597   1/1     Running   0          20s
+pod/webapp-579fb659cd-srxww   1/1     Running   0          20s
+pod/webapp-queue              1/1     Running   0          35m
+
+NAME                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue-svc   NodePort    100.67.119.207   <none>        8161:30020/TCP   35m
+service/fleetman-webapp      NodePort    100.68.142.178   <none>        80:30080/TCP     34m
+service/kubernetes           ClusterIP   100.64.0.1       <none>        443/TCP          53m
+
+NAME                     DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2         2         2            2           20s
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-579fb659cd   2         2         2       20s
+
+
+Notice the Replcaset part
+
+Now as you update manifest a rolling update takes place where one pod is swapped out at a time to keep the service up and running. 
+A second replicaset is created with new image and the old one made = 0 but kept
+
+Changed image
+
+================================================================================
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get all
+===============================================================================
+
+NAME                          READY   STATUS    RESTARTS   AGE
+pod/webapp-579fb659cd-dj597   1/1     Running   0          12m
+pod/webapp-579fb659cd-srxww   1/1     Running   0          12m
+pod/webapp-59458bf5b-59rbx    1/1     Running   0          5s
+pod/webapp-queue              1/1     Running   0          47m
+
+NAME                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue-svc   NodePort    100.67.119.207   <none>        8161:30020/TCP   47m
+service/fleetman-webapp      NodePort    100.68.142.178   <none>        80:30080/TCP     46m
+service/kubernetes           ClusterIP   100.64.0.1       <none>        443/TCP          1h
+
+NAME                     DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2         3         1            2           12m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-579fb659cd   2         2         2       12m
+replicaset.apps/webapp-59458bf5b    1         1         1       5s
+
+################################
+30 secs later
+################################
+
+=================================================================================
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl get all
+===============================================================================
+
+NAME                         READY   STATUS    RESTARTS   AGE
+pod/webapp-59458bf5b-59rbx   1/1     Running   0          1m
+pod/webapp-59458bf5b-tvsqn   1/1     Running   0          54s
+pod/webapp-queue             1/1     Running   0          49m
+
+NAME                         TYPE        CLUSTER-IP       EXTERNAL-IP   PORT(S)          AGE
+service/fleetman-queue-svc   NodePort    100.67.119.207   <none>        8161:30020/TCP   49m
+service/fleetman-webapp      NodePort    100.68.142.178   <none>        80:30080/TCP     47m
+service/kubernetes           ClusterIP   100.64.0.1       <none>        443/TCP          1h
+
+NAME                     DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+deployment.apps/webapp   2         2         2            2           13m
+
+NAME                                DESIRED   CURRENT   READY   AGE
+replicaset.apps/webapp-579fb659cd   0         0         0       13m
+replicaset.apps/webapp-59458bf5b    2         2         2       1m
+
+=============================================================================================
+	kubectl apply -f fleetman-app-pod-deplyment.yml
+==============================================================================================
+
+root@michael-VirtualBox:/home/michael/kubernetes/microservice# kubectl describe deployment
+Name:                   webapp
+Namespace:              default
+CreationTimestamp:      Sat, 19 Oct 2019 17:16:50 +0100
+Labels:                 <none>
+Annotations:            deployment.kubernetes.io/revision: 2
+                        kubectl.kubernetes.io/last-applied-configuration:
+                          {"apiVersion":"apps/v1","kind":"Deployment","metadata":{"annotations":{},"name":"webapp","namespace":"default"},"spec":{"minReadySeconds":...
+Selector:               app=webapp,name=fleetman-webapp
+Replicas:               2 desired | 2 updated | 2 total | 2 available | 0 unavailable
+StrategyType:           RollingUpdate
+MinReadySeconds:        30
+RollingUpdateStrategy:  25% max unavailable, 25% max surge
+Pod Template:
+  Labels:  app=webapp
+           name=fleetman-webapp
+  Containers:
+   fleetman-webapp:
+    Image:        richardchesterwood/k8s-fleetman-webapp-angular:release0-5
+    Port:         <none>
+    Host Port:    <none>
+    Environment:  <none>
+    Mounts:       <none>
+  Volumes:        <none>
+Conditions:
+  Type           Status  Reason
+  ----           ------  ------
+  Available      True    MinimumReplicasAvailable
+  Progressing    True    NewReplicaSetAvailable
+OldReplicaSets:  <none>
+NewReplicaSet:   webapp-59458bf5b (2/2 replicas created)
+Events:
+  Type    Reason             Age    From                   Message
+  ----    ------             ----   ----                   -------
+  Normal  ScalingReplicaSet  16m    deployment-controller  Scaled up replica set webapp-579fb659cd to 2
+  Normal  ScalingReplicaSet  4m24s  deployment-controller  Scaled up replica set webapp-59458bf5b to 1
+  Normal  ScalingReplicaSet  3m50s  deployment-controller  Scaled down replica set webapp-579fb659cd to 1
+  Normal  ScalingReplicaSet  3m50s  deployment-controller  Scaled up replica set webapp-59458bf5b to 2
+  Normal  ScalingReplicaSet  3m17s  deployment-controller  Scaled down replica set webapp-579fb659cd to 0
+
+==========================================================================
+	kubectl rollout status deploy webapp
+============================================================================
+
+deployment "webapp" successfully rolled out
+
+=============================================
+kubectl rollout history deploy webapp
+kubectl rollout undo deploy webapp
+=============================================
+deployment.extensions/webapp
+REVISION  CHANGE-CAUSE
+1         <none>
+2         <none>
+
+=============================================================
+kubectl rollout status deploy webapp
+===============================================================
+
+Waiting for deployment "webapp" rollout to finish: 1 old replicas are pending termination...
+Waiting for deployment "webapp" rollout to finish: 1 old replicas are pending termination...
+deployment "webapp" successfully rolled out
+
+
+======
+networming
+=======================
+
+ kubectl exec -it webapp-579fb659cd-cqmxv bash
+ 
+   apt-get update
+   apt-get install mysql-client
+  
+  kubectl exec -it webapp-579fb659cd-cqmxv sh     because he uses alpine scalled down shell for his webapp
+  
+  apk update
+  apk add mysql-client
+  
+  mysql -h database -uroot -ppassword fleetman
+  
+  mysql> CREATE TABLE Persons (
+      ->     PersonID int,
+      ->     LastName varchar(255),
+      ->     FirstName varchar(255),
+      ->     Address varchar(255),
+      ->     City varchar(255)
+      -> );
+  Query OK, 0 rows affected (0.01 sec)
+  
+  mysql> show tables;
+  +--------------------+
+  | Tables_in_fleetman |
+  +--------------------+
+  | Persons            |
+  +--------------------+
+  1 row in set (0.00 sec)
