@@ -63,7 +63,7 @@ install_kops () {
 install_kubernetes () {
       
      CWD="$(pwd)"
-$    echo $CWD
+     echo $CWD
      cd azuka_helm_terraform
 
      echo "we are in directory $CWD"
