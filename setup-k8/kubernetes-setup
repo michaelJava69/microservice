@@ -65,12 +65,14 @@ install_kubernetes () {
      CWD="$(pwd)"
      echo $CWD
      cd azuka_helm_terraform
+     CWD="$(pwd)"
 
-     echo "we are in directory $CWD"
+     echo "we are carrying out sed in directory $CWD"
      sed -i 's/"0-0-0-0--0/"aws-0-0-0-0--0/g' kubernetes.tf
    
+     terraform 0.12upgrade -force -yes
      terraform init
-     terraform 0.12upgrade -force -yes 
+     #terraform 0.12upgrade -force -yes 
      terraform apply -auto-approve
 
  
