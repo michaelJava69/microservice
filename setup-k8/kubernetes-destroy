@@ -1,0 +1,28 @@
+#!/bin/bash
+ 
+delete_kops () {
+    kops delete cluster kops.azuka.tk --state=s3://kops.helm.devopsinuse.com  --yes
+ 
+}
+
+
+
+
+delete_kubernetes () {
+     
+     cd azuka_helm_terraform
+     
+     terraform destroy -auto-approve
+     
+     cd ..
+     rm -r azuka_helm_terraform
+     
+    
+
+ 
+}
+
+
+
+delete_kubernetes
+delete_kops

@@ -1,0 +1,1 @@
+kops delete cluster kops.azuka.ga --state=s3://kops.helm2.devopsinuse.com  --yes
