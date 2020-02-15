@@ -1,0 +1,62 @@
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name:  new-joiner
+    
+rules:
+- apiGroups: ["","apps",”autoscaling”,”extensions”]    # "" indicates the core API group and apps  (v1)    deployment is in apps/v1
+  resources: ["*"]     # pods , services and  deployment
+  verbs: ["get", "watch", "list"]
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name:  put_specific-user-into-new-joiner-role
+ 
+subjects:
+   # list users going into this role
+- kind: User
+  name: francis-linux-login-name
+- kind: User
+  name: michael-linux-login-name
+roleRef:
+   kind: ClusterRole
+   name: new-joiner    # actual name of the Role
+   apiGroup: rbac.authorization.k8s.io
+
+---
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name:  new-joiner
+   namespace: playground 
+rules:
+- apiGroups: ["","apps",”extensions”]       # "" indicates the core API group and apps  (v1)    deployment is in apps/v1
+  resources: ["*"]     # pods , services and  deployment
+  verbs: ["*"]
+---
+
+kind:  RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+   name:  new-joiner-role-binding
+   namespace: playground
+subjects:
+   # list users going into this role
+- kind: User
+  name: francis-linux-login-name
+- kind: User
+  name: michael-linux-login-name
+roleRef:
+   kind: Role
+   name: new-joiner    # actual name of the Role
+   apiGroup: rbac.authorization.k8s.io
+
+
+
+
+
+
+

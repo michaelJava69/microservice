@@ -86,7 +86,7 @@ kops_create () {
           --state=s3://kops.helm2.devopsinuse.com \
           --authorization RBAC \
           --zones=eu-west-1a \
-          --node-count=1 \
+          --node-count=2 \
           --node-size=t2.medium \
           --master-size=t2.micro \
           --master-count=1 \

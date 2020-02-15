@@ -5,7 +5,7 @@ install_kops () {
     #https://github.com/kubernetes/kops/issues/2428
 
     # check if cluster exist, create if not, replace otherwise
-    if [[ ! $(kops get cluster  --state=s3://kops.helm.devopsinuse.com) ]]; then
+    if [[ ! $(kops get cluster  --state=s3://kops.helm2.devopsinuse.com) ]]; then
         #kops create -f cluster.yaml --name "${CLUSTER_NAME}" -v 10
   
         echo "trying to create KOPS cluster"
@@ -34,21 +34,21 @@ install_kops () {
 
          #kops replace -f cluster.yaml --name "${CLUSTER_NAME}" -v 10
 
-          kops delete cluster kops.azuka.tk --state=s3://kops.helm.devopsinuse.com  --yes
+          kops delete cluster kops.azuka.ga --state=s3://kops.helm2.devopsinuse.com  --yes
 
 
           kops_create
 
         #  kops create cluster \
-        #  --name=kops.azuka.tk \
-        #  --state=s3://kops.helm.devopsinuse.com \
+        #  --name=kops.azuka.ga \
+        #  --state=s3://kops.helm2.devopsinuse.com \
         #  --authorization RBAC \
         #  --zones=eu-west-1a \
         #  --node-count=1 \
         #  --node-size=t2.medium \
         #  --master-size=t2.micro \
         #  --master-count=1 \
-        #  --dns-zone=kops.azuka.tk \
+        #  --dns-zone=kops.azuka.ga \
         #  --out=azuka_helm_terraform \
         #  --target=terraform \
         #  --ssh-public-key=~/.ssh/udemy_devopsinuse.pub
@@ -63,8 +63,12 @@ install_kops () {
 install_kubernetes () {
       
      CWD="$(pwd)"
-$    echo $CWD
+     echo $CWD
      cd azuka_helm_terraform
+
+     CWD2="$(pwd)"
+     echo $CWD2
+
 
      echo "we are in directory $CWD"
      sed -i 's/"0-0-0-0--0/"aws-0-0-0-0--0/g' kubernetes.tf
@@ -80,15 +84,15 @@ $    echo $CWD
 kops_create () {
 
  kops create cluster \
-          --name=kops.azuka.tk \
-          --state=s3://kops.helm.devopsinuse.com \
+          --name=kops.azuka.ga \
+          --state=s3://kops.helm2.devopsinuse.com \
           --authorization RBAC \
-          --zones=eu-west-1a,eu-west-1b,eu-west-1c \
-          --node-count=1 \
-          --node-size=t2.medium \
+          --zones=eu-west-1a \
+          --node-count=2 \
+          --node-size=t2.micro \
           --master-size=t2.micro \
           --master-count=1 \
-          --dns-zone=kops.azuka.tk \
+          --dns-zone=kops.azuka.ga \
           --out=azuka_helm_terraform \
           --target=terraform \
           --ssh-public-key=~/.ssh/udemy_devopsinuse.pub
